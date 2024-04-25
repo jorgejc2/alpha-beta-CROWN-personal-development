@@ -241,6 +241,8 @@ def fast_hist_copy(hists):
 def print_splitting_decisions(net, d, split_depth, split, verbose=False):
     """Print the first two split for first 10 domains."""
     print('splitting decisions: ')
+    # FIXME: remove hardcoded verbose
+    verbose = True
     branching_decision = split['decision']
     batch = next(iter(d['lower_bounds'].values())).shape[0]
     for l in range(split_depth):

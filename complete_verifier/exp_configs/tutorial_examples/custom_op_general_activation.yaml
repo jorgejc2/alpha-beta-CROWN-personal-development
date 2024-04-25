@@ -5,7 +5,7 @@ general:
 model:
   # Use the linear_masked_sigmoid_model() in "custom_op_general_activation.py".
   name: Customized("custom_op_general_activation", "linear_masked_sigmoid_model")
-  path: models/non_relu/cifar_conv_small_sigmoid_masked.pth  # clean acc is 6317.
+  path: /home/jorgejc2/Documents/ClassRepos/ECE584FinalProject/alpha-beta-CROWN-personal-development/complete_verifier/models/non_relu/cifar_conv_small_sigmoid_masked.pth  # clean acc is 6317.
 data:
   dataset: CIFAR  # Make sure the normalization is the same as training!.
   mean: [0.4914, 0.4822, 0.4465]

@@ -69,7 +69,7 @@ class LinearMaskedSigmoid(nn.Module):
             size = (size, )
         # All mask, slope and bias are element-wise.
         self.register_buffer('mask', (torch.rand(size=size) > 0).to(dtype=torch.get_default_dtype()))
-        self.register_buffer('alpha', torch.rand(size=size, dtype=torch.get_default_dtype()))
+        self.register_buffer('slope', torch.rand(size=size, dtype=torch.get_default_dtype()))
         self.register_buffer('bias', torch.rand(size=size, dtype=torch.get_default_dtype()))
 
     def forward(self, input):

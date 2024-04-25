@@ -33,6 +33,7 @@ for k in s:
         shape = sizes[mask_counter]
         n[f'linear_masked_sigmoid{mask_counter+1}.mask'] = torch.zeros(size=shape)
         n[f'linear_masked_sigmoid{mask_counter+1}.slope'] = torch.ones(size=shape)
+        # n[f'linear_masked_sigmoid{mask_counter + 1}.alpha'] = torch.ones(size=shape)
         n[f'linear_masked_sigmoid{mask_counter+1}.bias'] = torch.zeros(size=shape)
         mask_counter += 1
 

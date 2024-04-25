@@ -88,6 +88,14 @@ class NonlinearBranching(NeuronBranchingHeuristic):
                                 **kwargs):
         """Get rough decisions by a heuristic."""
 
+        # FIXME: jorgejc2 this is a temporary hardcoded dictionary to use as the branching points
+        verbose = True
+        preset_branching_points = [
+            -0.5,
+            -0.3,
+            0.2
+        ]
+
         split_masks = domains['mask']
         self.update_batch_size_and_device(domains['lower_bounds'])
 
@@ -102,9 +110,26 @@ class NonlinearBranching(NeuronBranchingHeuristic):
                 ret = self._dynamic_branching_points_bbps(
                     node, domains=domains)
             else:
-                ret = self.compute_branching_scores(
-                    node, domains=domains,
-                    branching_point_method=branching_point_method)
+
+                # checking history
+                history = domains['history'][0][name][2]
+                using_preset = False
+                for preset_point in preset_branching_points:
+                    if preset_point not in history:
+                        ret = preset_point
+                        device = domains['thresholds'].device
+                        ret = {
+                            'margin_after': torch.tensor([[[[0.0]]], [[[0.0]]]], device=device),
+                            'points': torch.tensor([[[preset_point]]], device=device),
+                            'scores': torch.tensor([[0.]], device=device),
+                        }
+                        using_preset = True
+                        break
+
+                if not using_preset:
+                    ret = self.compute_branching_scores(
+                        node, domains=domains,
+                        branching_point_method=branching_point_method)
 
             scores[name] = ret['scores'].flatten(1) * split_masks[node.name]
             scores[name] += split_masks[name] * 1e-10

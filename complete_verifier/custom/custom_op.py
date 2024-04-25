@@ -74,7 +74,8 @@ class LinearMaskedRelu(nn.Module):
             size = (size, )
         # All mask, slope and bias are element-wise.
         self.register_buffer('mask', (torch.rand(size=size) > 0).to(dtype=torch.get_default_dtype()))
-        self.register_buffer('alpha', torch.rand(size=size, dtype=torch.get_default_dtype()))
+        # self.register_buffer('alpha', torch.rand(size=size, dtype=torch.get_default_dtype()))
+        self.register_buffer('slope', torch.rand(size=size, dtype=torch.get_default_dtype()))
         self.register_buffer('bias', torch.rand(size=size, dtype=torch.get_default_dtype()))
 
     def forward(self, input):
@@ -117,8 +118,12 @@ class BoundLinearMaskedRelu(BoundRelu):
     def _backward_relaxation(self, last_lA, last_uA, x, start_node, unstable_idx):
         """Element-wise CROWN relaxation for our special ReLU activation function."""
         # Call parent class to relax ReLU neurons.
-        upper_d, upper_b, lower_d, lower_b, lb_lower_d, ub_lower_d, alpha_lookup_idx = super()._backward_relaxation(
+        # upper_d, upper_b, lower_d, lower_b, lb_lower_d, ub_lower_d, alpha_lookup_idx = super()._backward_relaxation(
+        #         last_lA, last_uA, x, start_node, unstable_idx)
+        values = super()._backward_relaxation(
                 last_lA, last_uA, x, start_node, unstable_idx)
+        upper_d, upper_b, lower_d, lower_b, lb_lower_d, ub_lower_d,\
+        lb_upper_d, ub_upper_d, lb_upper_b, ub_upper_b, alpha_lookup_idx = values
         # Modify the relaxation coefficients for these linear neurons.
         neg_mask = 1.0 - self._mask
         masked_slope = self._mask * self._slope
@@ -137,8 +142,8 @@ class BoundLinearMaskedRelu(BoundRelu):
         # The required dimension is (batch, spec, C, H, W). The size of masked_bias is (C,H,W),
         # and we need to expand other dimensions.
         lower_b = masked_bias.unsqueeze(0).unsqueeze(0).expand(upper_b.size())
-        return upper_d, upper_b, lower_d, lower_b, lb_lower_d, ub_lower_d, alpha_lookup_idx
-
+        # return upper_d, upper_b, lower_d, lower_b, lb_lower_d, ub_lower_d, alpha_lookup_idx
+        return upper_d, upper_b, lower_d, lower_b, lb_lower_d, ub_lower_d, lb_upper_d, ub_upper_d, lb_upper_b, ub_upper_b, alpha_lookup_idx
     def bound_backward(self, last_lA, last_uA, x, mask, slope, bias, **kwargs):
         """Backward LiRPA (CROWN) bound propagation."""
         # These are additional variabels that will be used in _backward_relaxation(), so we save them here.
